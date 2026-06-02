@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "glyph-mi"
+version = "2.3.0"
+description = "Glyph MI 2.3-O (Senza) — local music metadata intelligence"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "GPL-3.0-or-later" }
+authors = [{ name = "Floke Studio" }]
+dependencies = []
+
+[project.optional-dependencies]
+spectral = ["librosa>=0.10", "numpy>=1.24"]
+
+[project.scripts]
+glyph-mi = "glyph_mi.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["glyph_mi*"]

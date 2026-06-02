@@ -1,0 +1,67 @@
+/**
+ * Optional Ollama provider — shared across Glyph MI, Search, Obsidian.
+ * Fails silently; callers fall back to algorithmic paths.
+ */
+
+export const DEFAULT_OLLAMA_URL = 'http://127.0.0.1:11434';
+export const DEFAULT_OLLAMA_MODEL = 'llama3.2';
+
+export function parseJsonLoose(text) {
+  const raw = String(text || '').trim();
+  const start = raw.indexOf('{');
+  const end = raw.lastIndexOf('}');
+  if (start < 0 || end < 0) return null;
+  try {
+    return JSON.parse(raw.slice(start, end + 1));
+  } catch {
+    return null;
+  }
+}
+
+export async function ollamaAvailable(options = {}) {
+  const baseUrl = options.ollamaUrl || DEFAULT_OLLAMA_URL;
+  try {
+    const res = await fetch(`${baseUrl}/api/tags`, { method: 'GET' });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * @param {{ prompt: string, format?: string }} req
+ * @param {{ ollamaUrl?, model?, timeoutMs? }} options
+ * @returns {Promise<string|null>} raw response text
+ */
+export async function ollamaGenerate(req, options = {}) {
+  const baseUrl = options.ollamaUrl || DEFAULT_OLLAMA_URL;
+  const model = options.model || DEFAULT_OLLAMA_MODEL;
+  const timeout = options.timeoutMs ?? 12000;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeout);
+  try {
+    const res = await fetch(`${baseUrl}/api/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        model,
+        stream: false,
+        format: req.format || 'json',
+        prompt: req.prompt,
+      }),
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return data.response ?? null;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export async function ollamaJson(req, options = {}) {
+  const text = await ollamaGenerate({ ...req, format: 'json' }, options);
+  return text ? parseJsonLoose(text) : null;
+}
