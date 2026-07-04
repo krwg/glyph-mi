@@ -1,7 +1,3 @@
-/**
- * Optional Ollama provider for Glyph MI (Senza).
- * Uses @glyph/core; falls back to glyph-rules on failure.
- */
 import {
   DEFAULT_OLLAMA_MODEL,
   DEFAULT_OLLAMA_URL,

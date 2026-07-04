@@ -1,7 +1,3 @@
-/**
- * Glyph 2.3-O analysis pipeline (renderer).
- * Uses track.glyph from Electron glyph-features.cjs (import / re-scan).
- */
 import { analyze } from './index.js';
 import { sanitizeGlyphFields } from './core/sanitize.js';
 import { evaluateSuggestion } from './core/suggestion-confidence.js';
@@ -87,9 +83,7 @@ function applyKnnLayer(fields, track, libraryRows, reasons, sources) {
   return { fields: merged.fields, reasons: merged.reasons };
 }
 
-/**
- * Full Glyph 2.0 enrich after base analyze().
- */
+
 export async function runGlyphPipeline(track, state, baseResult, { libraryRows = [], settings = {} }) {
   const sources = [...(baseResult.sources || [])];
   let reasons = [...(baseResult.confidence?.reasons || [])];
@@ -124,9 +118,7 @@ export async function runGlyphPipeline(track, state, baseResult, { libraryRows =
   };
 }
 
-/**
- * Run full analysis: base + pipeline; Ollama only if low confidence.
- */
+
 export async function analyzeTrackFull(track, state, options = {}) {
   const input = options.input;
   const settings = state.settings || {};

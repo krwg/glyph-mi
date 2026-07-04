@@ -1,12 +1,12 @@
 # glyph-mi 2.3-O
 
-**Metadata Intelligence** for [Senza](https://github.com/FlokeStudio/Senza) — local tag suggestions, spectral BPM/genre hints, knowledge packs, KNN, optional Ollama.
+**Metadata Intelligence** for [Senza](https://github.com/krwg/senza) — local tag suggestions, spectral BPM/genre hints, knowledge packs, KNN, optional Ollama.
 
 <p>
   <img src="https://img.shields.io/badge/version-2.3.0-blue" alt="version" />
   <img src="https://img.shields.io/badge/mode-offline--first-green" alt="offline" />
   <img src="https://img.shields.io/badge/Ollama-optional-111" alt="ollama" />
-  <a href="https://github.com/FlokeStudio/glyph-mi/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-orange" alt="license" /></a>
+  <a href="https://github.com/krwg/glyph-mi/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-orange" alt="license" /></a>
 </p>
 
 Full guide (RU): **[GUIDE.ru.md](GUIDE.ru.md)**
@@ -23,11 +23,11 @@ models/          Optional ONNX weights (not in git by default)
 
 ## Senza integration
 
-From `Senza Dev/`:
+From the Senza repo root:
 
 ```bash
-npm run glyph:sync-mirror   # this repo → Senza Dev/glyph-mi/
-npm run glyph:push-mirror   # Senza js/models → this repo
+npm run glyph:sync-mirror   # glyph-mi → Senza/glyph-mi/
+npm run glyph:push-mirror   # Senza js/models → glyph-mi
 ```
 
 On import, Senza’s `glyph-features.cjs` fills `track.glyph` (BPM, energy, genre). The JS pipeline reads `context.glyphFeatures` for tagging.
@@ -51,10 +51,10 @@ Used only when confidence is low; rules + spectral + KNN run first.
 
 | Repo | Role |
 |------|------|
-| [glyph-miO](https://github.com/FlokeStudio/glyph-miO) | Obsidian note MI |
-| [glyph-s](https://github.com/FlokeStudio/glyph-s) | Search engine |
-| [glyph-sO](https://github.com/FlokeStudio/glyph-sO) | Obsidian vault search |
+| [glyph-miO](https://github.com/krwg/glyph-miO) | Obsidian note MI |
+| [glyph-s](https://github.com/krwg/glyph-s) | Search engine |
+| [glyph-sO](https://github.com/krwg/glyph-sO) | Obsidian vault search |
 
 ---
 
-Floke Studio · GPL-3.0-or-later
+krwg · GPL-3.0-or-later

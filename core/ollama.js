@@ -1,8 +1,3 @@
-/**
- * Optional Ollama provider — shared across Glyph MI, Search, Obsidian.
- * Fails silently; callers fall back to algorithmic paths.
- */
-
 export const DEFAULT_OLLAMA_URL = 'http://127.0.0.1:11434';
 export const DEFAULT_OLLAMA_MODEL = 'llama3.2';
 
@@ -28,11 +23,7 @@ export async function ollamaAvailable(options = {}) {
   }
 }
 
-/**
- * @param {{ prompt: string, format?: string }} req
- * @param {{ ollamaUrl?, model?, timeoutMs? }} options
- * @returns {Promise<string|null>} raw response text
- */
+
 export async function ollamaGenerate(req, options = {}) {
   const baseUrl = options.ollamaUrl || DEFAULT_OLLAMA_URL;
   const model = options.model || DEFAULT_OLLAMA_MODEL;

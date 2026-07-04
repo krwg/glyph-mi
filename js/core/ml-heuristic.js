@@ -1,8 +1,3 @@
-/**
- * Glyph 2.0 local ML layer (no ONNX file required).
- * Uses audio profile + text features; ONNX can replace later via same interface.
- */
-
 const GENRES = [
   'Hip-Hop',
   'Pop',
@@ -59,7 +54,7 @@ export function classifyWithHeuristics({ title, artist, path, glyph = {}, genre:
   if (!genre) {
     if (bpm >= 128 && energy > 0.18) genre = 'Dance';
     else if (energy < 0.09 && bpm < 105) genre = 'Ambient';
-    /* no default Pop — leave empty unless text/BPM strongly hints */
+    
   }
   if (inferred && genre) reasons.push('ml-heuristic: genre inferred');
   if (fromText) reasons.push('ml-heuristic: genre from text/path');

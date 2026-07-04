@@ -1,4 +1,3 @@
-/** Split search query into lowercase tokens (unicode-aware letters/numbers). */
 export function tokenizeQuery(q) {
   return String(q || '')
     .trim()
@@ -7,9 +6,7 @@ export function tokenizeQuery(q) {
     .filter(Boolean);
 }
 
-/**
- * Parse `type:release page:glyph app:senza` filters + free tokens.
- */
+
 export function parseSearchQuery(raw) {
   const parts = String(raw || '').trim().split(/\s+/);
   const filters = { type: null, page: null, app: null, tokens: [] };
