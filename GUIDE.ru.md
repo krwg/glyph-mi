@@ -1,214 +1,178 @@
-# Glyph — единое руководство (Senza + Glyph-MI)
+# Glyph — руководство для пользователей Senza
 
-**Версия платформы:** **Glyph 2.3-O** (Senza MI + Search + Obsidian) · **Репозиторий:** [krwg/glyph-mi](https://github.com/krwg/glyph-mi)  
-**Зеркало в Senza:** `Senza Dev/glyph-mi/` · **Поиск:** репо [glyph-s](../glyph-s) · **Obsidian:** [glyph-mio](../glyph-mio), [glyph-so](../glyph-so) · **Канон — этот файл.**
+**Glyph 2.3-O** — локальный помощник по **метаданным** в [Senza](https://github.com/krwg/senza): подсказки тегов, порядок в библиотеке, поиск дубликатов, массовые правки. Всё работает **на вашем компьютере**; интернет и Ollama нужны только если вы сами их включите.
 
----
-
-## 1. Суть
-
-**Glyph** — локальный **Metadata Intelligence** внутри Senza: теги, путь `music/Artist/Album`, соседи альбома, пакеты знаний, **KNN** по библиотеке, опционально **MusicBrainz / AcoustID / Ollama**. Плюс дубликаты, **Поток**, diff/batch UI, SQLite-журнал событий.
-
-Пользователю **не нужны** Python, pip, Glyph Lab, fpcalc (кроме спектральных дубликатов).
-
-| В Senza 1.0 Vivo | Glyph2.1-O |
-|------------------|------------|
-| **Поток (Flow)** | волна ~32 трека, режимы отбора, палитра с обложки, плавный **pulse 0–10** и ритм по BPM |
-| **Импорт** | `normalizeImportMeta` до копирования → опциональный **авто-тег** MP3 |
-| **Редактор тегов** | панель: балл, бейджи источников, diff, чипы, Apply / Reject / Re-run |
-| **Библиотека (Vault)** | скан, превью правок, дубликаты, batch «Заполнить библиотеку» |
-| **Настройки** | **вкл/выкл Glyph2.1-O**, MB, SQLite-лог, аналитика, экспорт JSONL |
-| **Журнал Senza** | отдельно от Glyph-log: время в приложении, прослушивание, топы (см. §7) |
-
-**Выключение Glyph** (`settings.glyphEnabled = false`): обычный редактор тегов, бренд **SENZA** на Потоке, без скана Glyph в библиотеке.
+Полное описание движка в этом репозитории: [krwg/glyph-mi](https://github.com/krwg/glyph-mi) · кратко на EN: [README.md](README.md)
 
 ---
 
-## 2. Репозитории и зеркало
+## С чего начать
+
+1. Установите **Senza** с [релизов](https://github.com/krwg/senza/releases).
+2. Импортируйте музыку (**Импорт** или перетаскивание файлов).
+3. Откройте **Настройки → Glyph** — убедитесь, что Glyph **включён** (по умолчанию да).
+4. Отредактируйте теги у трека или зайдите в **Music Vault**, чтобы увидеть подсказки по всей коллекции.
+
+**Не нужно устанавливать:** Python, pip, Ollama, Chromaprint — для обычного использования достаточно Senza.
+
+---
+
+## Что делает Glyph
+
+| В приложении | Зачем это вам |
+|--------------|----------------|
+| **Подсказки при импорте** | Имя файла и папка превращаются в артиста, альбом и название **до** копирования в библиотеку — меньше «Unknown Artist». |
+| **Редактор тегов** | Балл уверенности, откуда взята подсказка, сравнение «было → стало», кнопки **Применить / Отклонить / Пересчитать**. |
+| **Music Vault** | Оценка коллекции, список проблемных треков, **дубликаты**, массовое «Заполнить библиотеку». |
+| **Поток (Flow)** | Личная волна треков; фон и ритм могут опираться на BPM и обложку (это часть Senza, не отдельная установка). |
+| **Авто-тег при импорте** | Опционально: после импорта сразу записать подсказки в MP3 (включается в настройках Glyph). |
+
+**Если выключить Glyph** в настройках: остаётся обычный редактор тегов, без умного скана в Vault и без панели Glyph в редакторе.
+
+---
+
+## Как Glyph принимает решения (простыми словами)
+
+Glyph не «угадывает из облака». Он идёт по цепочке **от простого к сложному**:
+
+1. **Имя файла и папка** — разбор `Artist - Title`, мусор с трекеров, структура `music/Artist/Album/`.
+2. **Аудио при импорте** — BPM, энергия, намёк на жанр (сохраняются в треке локально).
+3. **Пакеты знаний** — встроенные правила + ваши накопленные правки (если вы их экспортировали).
+4. **Похожие треки в вашей библиотеке** — если у соседей уже стоят нормальные теги, Glyph может подсказать то же.
+5. **MusicBrainz / AcoustID** — только если включено в настройках и есть интернет.
+6. **Ollama (локальный ИИ)** — только если вы установили [Ollama](https://ollama.com/) и включили агента; срабатывает редко, когда уверенность низкая.
+
+Жанр **Pop** не подставляется «на всякий случай» — нужны явные сигналы.
+
+---
+
+## Импорт музыки
+
+При добавлении файлов Senza:
+
+1. Читает существующие теги.
+2. **Glyph** нормализует метаданные (артист, альбом, название).
+3. Кладёт файл в папку вида `music/Исполнитель/Альбом/`.
+4. Сохраняет аудио-признаки для подсказок (BPM и т.д.).
+5. По желанию — сразу записывает теги в MP3 (**авто-тег при импорте**).
+
+Если имя файла неразборчивое, откройте редактор тегов или Vault — там будут подсказки с объяснением.
+
+---
+
+## Дубликаты
+
+| Способ | Когда срабатывает |
+|--------|-------------------|
+| **Одинаковые теги и длительность** | Два файла выглядят как один трек. |
+| **Одинаковое имя файла** | Разные копии с одним basename. |
+| **Похожий звук (спектр)** | Нужен инструмент Chromaprint; в Senza: **Настройки → Glyph → загрузить инструменты** (или команда разработчика `npm run glyph:download-tools` при сборке из исходников). |
+
+В Vault можно выбрать, что **оставить**, а что удалить из библиотеки.
+
+---
+
+## Два разных «журнала»
+
+Не путайте их — это разные вещи.
+
+### Журнал прослушиваний Senza
+
+**Настройки → Журнал**
+
+- Сколько времени вы провели в Senza.
+- Сколько реально слушали музыку.
+- Топ артистов и треков за неделю.
+- **Time Capsule** — «год назад вы слушали…».
+
+Данные: файл состояния Senza на диске (`playHistory`), **не отправляются** на сервер.
+
+### Журнал событий Glyph
+
+Только если включена аналитика Glyph в настройках.
+
+- Какие подсказки показывались, что вы **приняли или отклонили**.
+- Нужен для обучения ваших локальных правил и опционального экспорта.
+
+Файл: `%APPDATA%/senza/library/glyph/glyph-log.sqlite` (Windows). Экспорт JSONL — в `%APPDATA%/senza/library/glyph/exports/`, если вы его запускали.
+
+---
+
+## Онлайн и опциональные сервисы
+
+| Сервис | Нужно вам |
+|--------|-----------|
+| **MusicBrainz** | Интернет + переключатель в **Настройки → Glyph**. |
+| **AcoustID** | То же; ключ API — по желанию. |
+| **Ollama** | Установить локально, модель (например `llama3.2`), URL `http://127.0.0.1:11434`, включить в настройках Glyph. |
+| **Chromaprint (fpcalc)** | Только для поиска дубликатов «по звуку». |
+
+Без интернета работают шаги 1–4 из раздела «Как Glyph принимает решения».
+
+---
+
+## Где лежат данные
+
+Корень библиотеки Senza (Windows): **`%APPDATA%/senza/`**
 
 ```
-Floke Dev/
-  Glyph-MI/          js, glyph_mi, core, knowledge, models
-  glyph-s/           Search 2.3-O/On
-  glyph-mio/         Obsidian MI-O plugin
-  glyph-so/          Obsidian Search-O plugin
-  Senza Dev/
-    glyph-mi/        зеркало Glyph-MI
-    electron/glyph-features.cjs  → track.glyph при импорте
-  Floke/docs/assets/glyph-search-2.3.js
+senza/
+├── senza-state.json          # настройки, история прослушиваний
+└── library/
+    ├── music/                # ваши треки
+    ├── covers/
+    └── glyph/
+        ├── glyph-log.sqlite  # журнал Glyph (если включён)
+        ├── cache/            # кэш MusicBrainz / AcoustID
+        ├── knowledge/        # ваши выученные правила
+        └── exports/          # экспорт JSONL (если делали)
 ```
 
-| Команда | Направление |
-|---------|-------------|
-| `npm run glyph:sync-mirror` | Glyph-MI → Senza `glyph-mi/` |
-| `npm run glyph:push-mirror` | Senza `glyph-mi/js` → Glyph-MI |
-| `cd glyph-s && npm run bundle:floke` | glyph-s → Floke landing |
-
-**В релизе Senza** анализ — только **JS**. Python — Lab, CI, обучение ONNX.
+Пакеты знаний **из коробки** (`core-v1`, `heuristics-v1`) уже внутри Senza; отдельно качать их не нужно.
 
 ---
 
-## 3. Конвейер Glyph 2.3-O
+## Семейство Glyph (другие продукты)
 
-```
-вход (path, tags, соседи альбома, glyphFeatures с импорта)
-  → rules + filename-parser (junk-strip, type beat)
-  → glyph-spectral (BPM/energy/genreHint из track.glyph)
-  → knowledge packs (public + learned-user)
-  → sanitize (папка > VA, Artist - Title в title)
-  → ml-heuristic (+ ONNX если models/*.onnx)
-  → KNN (tracks_features в SQLite + память библиотеки)
-  → MusicBrainz / AcoustID (если включено)
-  → Ollama только если score < порога (~42)
-  → suggestion-confidence (балл «применить»)
-```
+Glyph в Senza — одна часть экосистемы. Остальное — **отдельные** репозитории и приложения:
 
-| provider / source | Роль |
-|-------------------|------|
-| `glyph-rules` | имя файла, теги, папка |
-| `glyph-mi` | rules + knowledge + sanitize |
-| `glyph-ml` | эвристики жанра/BPM; без слепого Pop |
-| `glyph-knn` | консенсус похожих треков в библиотеке |
-| `musicbrainz` / `acoustid` | онлайн + кэш `library/glyph/cache/` |
-| `glyph-local` | Ollama `127.0.0.1:11434` |
+| Репозиторий | Для кого |
+|-------------|----------|
+| [krwg/glyph-mi](https://github.com/krwg/glyph-mi) | Движок метаданных для Senza (этот репозиторий) |
+| [krwg/senza](https://github.com/krwg/senza) | Музыкальная библиотека и плеер |
+| [krwg/glyph-s](https://github.com/krwg/glyph-s) | Поиск (ядро) |
+| [krwg/glyph-miO](https://github.com/krwg/glyph-miO) | Теги и сводки в **Obsidian** |
+| [krwg/glyph-sO](https://github.com/krwg/glyph-sO) | Поиск по vault в **Obsidian** |
 
-**Ядро JS:** `pipeline.js`, `core/filename-parser.js`, `core/junk-strip.js`, `core/knn.js`, `core/ml-heuristic.js`, `core/logger.js`, `core/title-vector.js`, `providers/mi.js`, `core/sanitize.js`, `core/suggestion-confidence.js`.
-
-**Senza renderer:** `glyph-ui.js`, `glyph-diff.js`, `glyph-batch.js`, `glyph-auto-tag.js`, `glyph-scan.js`, `glyph-duplicates.js`, `glyph-spectral.js`, `glyph-vault.js`, `glyph-telemetry.js`, `glyph-settings.js`, `flow.js`, `flow-ambient.js`.
-
-**Senza main:** `glyph-import-meta.cjs`, `glyph-features.cjs`, `glyph-online.cjs`, `glyph-log-db.cjs`, `glyph-db.cjs`, `glyph-learn-rules.cjs`, `glyph-onnx.cjs`.
+В установленном Senza код glyph-mi уже встроен в папку `glyph-mi/` — **клонировать этот репозиторий пользователю не обязательно**.
 
 ---
 
-## 4. Импорт
+## Ограничения
 
-1. `readTags` → **`normalizeImportMeta`** (разбор `Artist - Title` **до** копирования)  
-2. `resolveLibraryAudioPath` → `music/Artist/Album/`  
-3. `extractGlyphFeatures` → `track.glyph` (bpm, energy, mood)  
-4. Если **Glyph включён** и **авто-тег при импорте** — `autoTagTracks` → `writeTags` (MP3), событие `glyph.auto`  
-5. `glyphDbSync` — индекс признаков для KNN  
-
-Без шага 2 файлы попадали в `Unknown Artist/`.
+- Запись тегов в релизе Senza — в основном **MP3** (ID3). FLAC и другие форматы — просмотр и подсказки; запись зависит от версии Senza.
+- Ollama и MusicBrainz — опционально; без них Glyph всё равно полезен офлайн.
+- Спектральные дубликаты — опционально, нужен fpcalc.
 
 ---
 
-## 5. Дубликаты, batch и Поток
+## Версии (кратко)
 
-| Дубликаты | Логика |
-|-----------|--------|
-| Метаданные | artist \| title \| album \| duration |
-| Имя файла | один basename |
-| Спектр | fpcalc + chromaprint, sim ≥ 0.82 (`npm run glyph:download-tools`) |
+| Glyph | Senza | Главное |
+|-------|-------|---------|
+| **2.3-O** | **1.1.0 Legato** | Актуальная линия: KNN, Vault, batch, журналы, Поток с pulse |
+| 2.1-O | 1.0.0 Vivo | SQLite-индекс, diff UI, переключатель Glyph |
+| 2.0 | 0.x | Первый pipeline, telemetry |
 
-**Batch:** `glyph-batch.js` — скан библиотеки, превью diff, массовое применение; кнопка в Vault.
-
-**Поток:** `flow.js` — волна без повторов в сессии (режимы: balanced / favorites / rare / discover).  
-`flow-ambient.js` — градиенты с обложки, CSS-переменные `--flow-pulse` (0–10) и `--flow-beat`, интерполяция по `audio.currentTime` и BPM. Librosa в UI-релизе нет.
+Подробности релизов Senza: [CHANGELOG](https://github.com/krwg/senza/blob/main/CHANGELOG.md) · [релизы](https://github.com/krwg/senza/releases).
 
 ---
 
-## 6. Пакеты знаний
+## Для разработчиков
 
-| Пакет | Где |
-|-------|-----|
-| `core-v1`, `heuristics-v1` | `knowledge/public/` (в git) |
-| `user-learned-v1` | после импорта экспорта Senza |
-| `learned-user.json` | `library/glyph/knowledge/` — правила с **decay 60 дней** |
-
-VA в эвристиках — **только** папка `Various Artists`, не подстрока `va` в пути.
+Сборка Senza из исходников, синхронизация зеркала glyph-mi, Python CLI и ONNX — в [README.md](README.md) (EN).  
+Краткая ссылка из Senza: [docs/GLYPH.md](https://github.com/krwg/senza/blob/main/docs/GLYPH.md).
 
 ---
 
-## 7. Два «журнала»
-
-### A. Журнал прослушиваний Senza (`senza-state.json` → `playHistory`)
-
-| Метрика | Как считается |
-|---------|----------------|
-| Время в Senza | `state.usage.totalMs` — активное окно |
-| Время прослушивания | сумма `durationSec` по записям истории |
-| Топ артистов / треков | за 7 дней |
-| Time Capsule | запись ~год назад (±7 дней) |
-
-UI: **Настройки → Журнал** (не в нижнем быстром меню).
-
-### B. Журнал событий Glyph (SQLite)
-
-Файл: `library/glyph/glyph-log.sqlite`
-
-| Таблица | Содержимое |
-|---------|------------|
-| `glyph_log` | suggest / apply / reject / auto, confidence, sources |
-| `glyph_diff` | val_before → val_glyph → val_after |
-| `tracks_features` | векторы для KNN |
-
-События: `glyph.suggest`, `glyph.apply`, `glyph.apply.edited`, `glyph.reject`, `glyph.auto`, `glyph.noop`, `glyph.ollama` (telemetry).
-
-Код: `js/core/logger.js`, `electron/glyph-log-db.cjs`, `src/js/glyph-telemetry.js`.  
-Экспорт **JSONL для fine-tune** → `library/glyph/exports/`.
-
-### Legacy jsonl
-
-`library/glyph/learn.jsonl` — опция «журнал обучения»; экспорт в private pack.
-
----
-
-## 8. Онлайн
-
-| Сервис | Нужно |
-|--------|--------|
-| MusicBrainz | интернет + переключатель в настройках |
-| AcoustID | опционально API key |
-| fpcalc | только спектральные дубликаты |
-| Ollama | выкл. по умолчанию; «try local agent» |
-
----
-
-## 9. Glyph Lab (приватно)
-
-```bash
-cd "Senza Dev"
-npm run glyph-lab    # GUI :5175
-```
-
-Workflow: Senza → правки тегов → экспорт → Lab → пакет → `glyph:push-mirror`.  
-`glyph-lab/PLAYBOOK.ru.md` — локально, не в git.
-
----
-
-## 10. Команды
-
-| Команда | Зачем |
-|---------|--------|
-| `npm run electron:dev:watch` | Senza + hot reload |
-| `npm run electron:build` | Windows installer 1.0.0 |
-| `npm run glyph:sync-mirror` | Glyph-MI → Senza |
-| `npm run glyph:push-mirror` | Senza js → Glyph-MI |
-| `npm run glyph:import-export` | экспорт → private pack |
-| `npm run glyph:download-tools` | fpcalc |
-| `npm run glyph-lab` | кураторство пакетов |
-
----
-
-## 11. Ограничения
-
-- Запись тегов в релизе — в основном **MP3** (ID3).  
-- ONNX — только при модели в `glyph-mi/models/` + `onnxruntime-node`.  
-- MusicBrainz / AcoustID — сеть и качество исходных тегов.  
-- Жанр Pop не подставляется без сильных сигналов (ml-heuristic + KNN).
-
----
-
-## 12. История версий
-
-| Версия | Senza | Содержание |
-|--------|-------|------------|
-| **2.1-O** | **1.0.0 Vivo** | SQLite KNN index, decay 60d, Diff UI, batch, аналитика, toggle Glyph, журнал Senza расширен, pulse Flow |
-| 2.0 | 0.x | pipeline, KNN JSON, telemetry, learned-user |
-| 1.0-O | ранний MVP | rules + MI, без batch/SQLite |
-
-**ONNX:** `python Glyph-MI/scripts/train-glyph-genre.py --db library/glyph/glyph-log.sqlite` → `.onnx` в `glyph-mi/models/`.
-
----
-
-*krwg · правки документации — только здесь · Senza: `docs/GLYPH.md` (ссылка)*
+*krwg · GPL-3.0-or-later · правки пользовательского текста — в этом файле*
