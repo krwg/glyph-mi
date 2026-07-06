@@ -3,42 +3,260 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>glyph-mi 2.7</title>
+  <title>glyph-mi 2.7 — Glyph Metadata Intelligence</title>
+  <meta name="description" content="Universal metadata intelligence core for Glyph products. Senza module, Cultiva foundation, Python and JavaScript APIs.">
   <style>
-    :root { color-scheme: dark; }
-    body { margin: 0; font-family: Inter, Segoe UI, Arial, sans-serif; background: #090b12; color: #edf0ff; }
-    .wrap { max-width: 940px; margin: 0 auto; padding: 56px 20px; }
-    .card { border: 1px solid #202945; border-radius: 20px; padding: 34px; background: #10172a; }
-    .brand { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
-    .brand img { width: 48px; height: 48px; }
-    h1 { margin: 0 0 8px; font-size: 35px; }
-    p { color: #bfcbe6; line-height: 1.58; margin: 0 0 10px; }
-    .caps { display: flex; flex-wrap: wrap; gap: 8px; margin: 15px 0 4px; }
-    .cap { border: 1px solid #2e3d63; border-radius: 999px; padding: 6px 10px; font-size: 12px; color: #d5dfff; }
-    .links { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
-    a { color: #d7e2ff; text-decoration: none; border: 1px solid #314164; padding: 10px 14px; border-radius: 10px; }
+    :root {
+      color-scheme: dark;
+      --bg: #0c0e11;
+      --bg-elevated: #13161c;
+      --bg-card: #171b22;
+      --border: #2a3038;
+      --text: #eceff4;
+      --muted: #8b95a5;
+      --accent: #6eb5ff;
+      --accent-dim: rgba(110, 181, 255, 0.1);
+      --warm: #e8b86d;
+      --green: #5fd4a4;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Inter, "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .nav {
+      display: flex; justify-content: space-between; align-items: center;
+      max-width: 1100px; margin: 0 auto; padding: 20px 28px;
+    }
+    .nav-links { display: flex; gap: 22px; font-size: 14px; }
+    .nav-links a { color: var(--muted); }
+    .hero {
+      text-align: center; padding: 80px 28px 64px;
+      background: radial-gradient(ellipse 70% 55% at 50% 0%, rgba(110,181,255,0.07), transparent 70%);
+    }
+    .hero-logo {
+      display: flex; flex-direction: column; align-items: center; gap: 16px; margin-bottom: 36px;
+    }
+    .hero-logo img { width: 80px; height: 80px; }
+    .hero-logo .name {
+      font-size: clamp(2rem, 4.5vw, 2.8rem); font-weight: 700; letter-spacing: -0.03em; margin: 0;
+    }
+    .hero-logo .tagline {
+      font-size: 14px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 0;
+    }
+    .hero h1 { font-size: clamp(1.6rem, 3.5vw, 2.2rem); font-weight: 600; margin: 0 0 20px; color: var(--muted); max-width: 720px; margin-left: auto; margin-right: auto; }
+    .hero .lead { max-width: 620px; margin: 0 auto 36px; font-size: 1.1rem; color: var(--muted); }
+    .cta-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; }
+    .btn {
+      display: inline-block; padding: 13px 24px; border-radius: 10px; font-weight: 600; font-size: 15px;
+      border: 1px solid var(--border);
+    }
+    .btn-primary { background: var(--accent); color: #0c0e11; border-color: var(--accent); }
+    .btn-primary:hover { background: #8ec8ff; text-decoration: none; }
+    .btn-secondary { background: var(--bg-card); color: var(--text); }
+    .btn-secondary:hover { background: var(--bg-elevated); text-decoration: none; }
+    .pill-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 28px; }
+    .pill {
+      font-size: 13px; padding: 6px 14px; border-radius: 999px;
+      border: 1px solid var(--border); color: var(--muted); background: var(--bg-card);
+    }
+    .pill.active { border-color: var(--green); color: var(--green); }
+    .pill.scaffold { border-color: var(--warm); color: var(--warm); }
+    .section { max-width: 1100px; margin: 0 auto; padding: 64px 28px; }
+    .section h2 { font-size: 1.85rem; margin: 0 0 14px; letter-spacing: -0.02em; }
+    .section .sub { color: var(--muted); margin: 0 0 36px; max-width: 700px; font-size: 1.05rem; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 22px; }
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: 18px; padding: 30px;
+    }
+    .card h3 { margin: 0 0 10px; font-size: 1.12rem; }
+    .card p { margin: 0; color: var(--muted); font-size: 0.96rem; }
+    .card .status {
+      display: inline-block; font-size: 11px; font-weight: 600; text-transform: uppercase;
+      letter-spacing: 0.06em; padding: 4px 10px; border-radius: 6px; margin-bottom: 12px;
+    }
+    .status-active { background: rgba(95,212,164,0.12); color: var(--green); }
+    .status-scaffold { background: rgba(232,184,109,0.12); color: var(--warm); }
+    .arch-diagram {
+      background: #0a0c0f; border: 1px solid var(--border); border-radius: 14px;
+      padding: 28px; font-family: "Cascadia Code", Consolas, monospace; font-size: 13px;
+      line-height: 1.7; color: #9aa8bc; overflow-x: auto;
+    }
+    .arch-diagram .hl { color: var(--accent); }
+    .arch-diagram .gr { color: var(--green); }
+    .arch-diagram .wn { color: var(--warm); }
+    .code-block {
+      background: #0a0c0f; border: 1px solid var(--border); border-radius: 14px;
+      padding: 24px; overflow-x: auto; font-family: "Cascadia Code", Consolas, monospace;
+      font-size: 13px; line-height: 1.55; color: #b8c5d6;
+    }
+    .code-block .kw { color: var(--accent); }
+    .code-block .str { color: var(--warm); }
+    .highlight {
+      background: var(--bg-elevated); border: 1px solid var(--border); border-radius: 18px;
+      padding: 36px; margin-top: 28px;
+    }
+    .highlight h3 { margin: 0 0 18px; color: var(--warm); font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    .family {
+      text-align: center; padding: 56px 28px 80px;
+      background: var(--bg-elevated); border-top: 1px solid var(--border);
+    }
+    .family h2 { margin-bottom: 12px; }
+    .family p { color: var(--muted); margin-bottom: 24px; }
+    .family-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; }
+    .family-links a {
+      color: var(--text); border: 1px solid var(--border); padding: 10px 20px; border-radius: 10px;
+      background: var(--bg-card); font-size: 14px;
+    }
+    .family-links a:hover { border-color: var(--accent); text-decoration: none; }
+    footer { text-align: center; padding: 28px; color: var(--muted); font-size: 13px; }
   </style>
 </head>
 <body>
-  <main class="wrap">
-    <section class="card">
-      <div class="brand">
-        <img src="./assets/glyph-transparent.png" alt="Glyph logo">
-        <strong>Glyph Metadata Intelligence</strong>
+  <nav class="nav">
+    <strong>Glyph</strong>
+    <div class="nav-links">
+      <a href="https://github.com/krwg/glyph-mi">GitHub</a>
+      <a href="https://github.com/krwg/glyph-mi#user-section">Docs</a>
+      <a href="https://github.com/FlokeStudio/glyph-miO">glyph-miO</a>
+      <a href="https://flokestudio.github.io/glyph-s/">glyph-s</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div class="hero-logo">
+      <img src="./assets/glyph-transparent.png" alt="Glyph">
+      <p class="tagline">Glyph Metadata Intelligence</p>
+      <p class="name">glyph-mi</p>
+    </div>
+    <h1>Understand your content.<br>Tags, metadata, and analysis — modular by design.</h1>
+    <p class="lead">Universal metadata intelligence core with product-specific modules. Senza stays fully supported; Cultiva foundation is prepared for the next generation of Glyph integrations.</p>
+    <div class="cta-row">
+      <a class="btn btn-primary" href="https://github.com/krwg/glyph-mi">View on GitHub</a>
+      <a class="btn btn-secondary" href="https://github.com/krwg/glyph-mi/blob/main/README.md">Read the docs</a>
+    </div>
+    <div class="pill-row">
+      <span class="pill">v2.7.0</span>
+      <span class="pill active">module: senza</span>
+      <span class="pill scaffold">module: cultiva</span>
+      <span class="pill">JS + Python</span>
+    </div>
+  </header>
+
+  <section class="section">
+    <h2>What’s new in 2.7</h2>
+    <p class="sub">From Senza-specific pipeline to a universal core with pluggable product modules — without breaking existing integrations.</p>
+    <div class="grid">
+      <article class="card">
+        <h3>Universal contracts</h3>
+        <p><code>normalizeInput()</code> and <code>normalizeResult()</code> define a stable API surface. Any product module receives the same shape and returns a consistent result envelope.</p>
+      </article>
+      <article class="card">
+        <h3>Module routing</h3>
+        <p><code>analyzeUniversal(input, { moduleId })</code> routes to the right handler. Unknown modules fall back to the default Senza analyzer with a hint in the response.</p>
+      </article>
+      <article class="card">
+        <h3>Senza module adapter</h3>
+        <p>Full Senza pipeline — tags, metadata, spectral analysis, kNN, local agent — wrapped as <code>module-senza</code> with zero behavior change for existing callers.</p>
+      </article>
+      <article class="card">
+        <h3>Cultiva foundation</h3>
+        <p>Scaffold module and knowledge pack placeholder for future Cultiva product integration. Manifest, handler stub, and <code>cultiva-foundation-v1.json</code> ready for extension.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Architecture</h2>
+    <p class="sub">Product-agnostic core with module adapters on top of the existing analysis pipeline.</p>
+    <div class="arch-diagram">
+<span class="hl">analyzeUniversal(input, { moduleId })</span><br>
+&nbsp;&nbsp;│<br>
+&nbsp;&nbsp;├─ <span class="gr">module: senza</span>  → analyzeForSenza()  → Senza pipeline (tags, spectral, kNN)<br>
+&nbsp;&nbsp;├─ <span class="wn">module: cultiva</span> → analyzeForCultivaFoundation() → scaffold<br>
+&nbsp;&nbsp;└─ <span class="hl">fallback</span>       → analyzeMI() → normalizeResult()<br>
+<br>
+<span class="hl">contracts.js</span>  normalizeInput / normalizeResult / GLYPH_MI_API_VERSION<br>
+<span class="hl">engine.js</span>     listGlyphModules / resolveGlyphModule / MODULE_HANDLERS
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Modules</h2>
+    <p class="sub">Each module has a manifest, handler, and optional knowledge pack.</p>
+    <div class="grid">
+      <article class="card">
+        <span class="status status-active">Active</span>
+        <h3>senza</h3>
+        <p>Music library metadata intelligence for Senza. Capabilities: tags, metadata, spectral analysis, kNN neighbors, local agent hints. Enabled by default.</p>
+      </article>
+      <article class="card">
+        <span class="status status-scaffold">Foundation</span>
+        <h3>cultiva</h3>
+        <p>Placeholder for Cultiva product integration. Manifest and handler scaffold in place; knowledge pack at <code>knowledge/public/cultiva-foundation-v1.json</code>.</p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>API quick start</h2>
+    <p class="sub">JavaScript universal entry and Python CLI for batch analysis.</p>
+    <div class="code-block">
+<span class="kw">import</span> { analyzeUniversal, listGlyphModules } <span class="kw">from</span> <span class="str">'./js/index.js'</span>;
+
+<span class="kw">const</span> modules = listGlyphModules();
+<span class="kw">//</span> [{ moduleId: 'senza', ... }, { moduleId: 'cultiva', ... }]
+
+<span class="kw">const</span> result = <span class="kw">await</span> analyzeUniversal({
+  moduleId: <span class="str">'senza'</span>,
+  track: { path: <span class="str">'/music/artist/album/track.flac'</span>, title: <span class="str">'Track'</span> },
+  context: { app: <span class="str">'senza'</span> },
+}, { moduleId: <span class="str">'senza'</span> });
+
+<span class="kw">//</span> result: { apiVersion, moduleId, fields, confidence, sources, hints }
+    </div>
+    <div class="highlight" style="margin-top:24px">
+      <h3>Python CLI</h3>
+      <div class="code-block" style="border:none;padding:0;background:transparent">
+pip install -e <span class="str">".[spectral]"</span><br>
+glyph-mi analyze --help
       </div>
-      <h1>glyph-mi 2.7</h1>
-      <p>Universal metadata intelligence core with product modules. Senza stays fully supported via adapter, and Cultiva foundation is prepared as a scaffold module.</p>
-      <div class="caps">
-        <span class="cap">universal contracts</span>
-        <span class="cap">module-senza</span>
-        <span class="cap">module-cultiva foundation</span>
-      </div>
-      <div class="links">
-        <a href="https://github.com/krwg/glyph-mi">Repository</a>
-        <a href="https://github.com/FlokeStudio/glyph-s">glyph-s</a>
-        <a href="https://github.com/FlokeStudio/glyph-miO">glyph-miO</a>
-      </div>
-    </section>
-  </main>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2>Where glyph-mi runs</h2>
+    <div class="grid">
+      <article class="card">
+        <h3>Senza desktop</h3>
+        <p>Primary consumer. Full pipeline with spectral features, kNN tag propagation, and local agent integration.</p>
+      </article>
+      <article class="card">
+        <h3>glyph-miO (Obsidian)</h3>
+        <p>Obsidian plugin with simplified extractive summaries and tag scoring. Shares design principles, lighter runtime.</p>
+      </article>
+      <article class="card">
+        <h3>Custom integrations</h3>
+        <p>Use <code>analyzeUniversal()</code> with your own <code>moduleId</code> or extend the module registry for new products.</p>
+      </article>
+    </div>
+  </section>
+
+  <div class="family">
+    <h2>Glyph 2.7 family</h2>
+    <p>Search and metadata intelligence, built to work together.</p>
+    <div class="family-links">
+      <a href="https://flokestudio.github.io/glyph-s/">glyph-s · search engine</a>
+      <a href="https://flokestudio.github.io/glyph-sO/">glyph-sO · Obsidian search</a>
+      <a href="https://flokestudio.github.io/glyph-miO/">glyph-miO · Obsidian MI</a>
+    </div>
+  </div>
+
+  <footer>GPL-3.0-or-later · krwg · glyph-mi 2.7</footer>
 </body>
 </html>
