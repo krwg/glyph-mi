@@ -1,0 +1,12 @@
+{
+  "id": "cultiva-foundation-v1",
+  "version": "2.7.0",
+  "module": "cultiva",
+  "status": "scaffold",
+  "description": "Foundation knowledge pack for future Cultiva integration. No active runtime rules yet.",
+  "rules": [],
+  "taxonomy": {
+    "domains": [],
+    "tags": []
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "moduleId": "cultiva",
+  "label": "Cultiva Module Foundation",
+  "enabledByDefault": false,
+  "status": "scaffold",
+  "capabilities": ["taxonomy", "metadata", "knowledge"],
+  "product": "cultiva"
+}

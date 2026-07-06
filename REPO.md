@@ -1,7 +1,9 @@
-# glyph-mi 2.3-O
+# glyph-mi Repository Note
 
-Бренд: **glyph-mi** · Senza Metadata Intelligence.
+`glyph-mi` is the universal metadata intelligence core in Glyph 2.7.
 
-Папка `Glyph-MI` → при публикации на GitHub переименуй репозиторий в **glyph-mi**.
-
-Индекс платформы: [../GLYPH.md](../GLYPH.md) · документация: [GUIDE.ru.md](GUIDE.ru.md)
+- Main docs: `README.md`
+- Site: https://krwg.github.io/glyph-mi/
+- Universal entry: `js/universal/engine.js`
+- Active module: `js/modules/senza/`
+- Cultiva foundation: `js/modules/cultiva/`

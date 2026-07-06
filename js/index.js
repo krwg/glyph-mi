@@ -1,10 +1,12 @@
 import { analyzeRules } from './providers/rules.js';
 import { analyzeMI } from './providers/mi.js';
 import { analyzeLocal, isLocalAgentAvailable } from './providers/local-agent.js';
+import { analyzeUniversal, listGlyphModules, resolveGlyphModule } from './universal/engine.js';
 
 export { splitArtists, joinArtists, parseArtistTitle } from './utils/artists.js';
 export { analyzeRules, analyzeMI, analyzeLocal, isLocalAgentAvailable };
 export { applyKnowledge } from './knowledge.js';
+export { analyzeUniversal, listGlyphModules, resolveGlyphModule };
 
 
 export async function analyze(input, options = {}) {
