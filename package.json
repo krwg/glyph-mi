@@ -1,0 +1,16 @@
+{
+  "name": "glyph-mi",
+  "version": "2.7.1",
+  "private": true,
+  "type": "module",
+  "description": "Glyph Metadata Intelligence — universal analysis core",
+  "scripts": {
+    "test": "node --test test/**/*.test.js"
+  },
+  "exports": {
+    ".": "./js/index.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

@@ -2,11 +2,15 @@ import { analyzeRules } from './providers/rules.js';
 import { analyzeMI } from './providers/mi.js';
 import { analyzeLocal, isLocalAgentAvailable } from './providers/local-agent.js';
 import { analyzeUniversal, listGlyphModules, resolveGlyphModule } from './universal/engine.js';
+import { analyzeForNotes, NOTES_MODULE_MANIFEST } from './modules/notes/index.js';
+import { GLYPH_MI_API_VERSION, normalizeInput, normalizeResult } from './universal/contracts.js';
 
 export { splitArtists, joinArtists, parseArtistTitle } from './utils/artists.js';
 export { analyzeRules, analyzeMI, analyzeLocal, isLocalAgentAvailable };
 export { applyKnowledge } from './knowledge.js';
 export { analyzeUniversal, listGlyphModules, resolveGlyphModule };
+export { analyzeForNotes, NOTES_MODULE_MANIFEST };
+export { GLYPH_MI_API_VERSION, normalizeInput, normalizeResult };
 
 
 export async function analyze(input, options = {}) {

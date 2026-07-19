@@ -12,6 +12,7 @@
 <p align="center">
   <a href="https://krwg.github.io/glyph-mi/">Site</a> ·
   <a href="GUIDE.ru.md">GUIDE.ru</a> ·
+  <a href="CHANGELOG.md">Changelog</a> ·
   <a href="https://github.com/FlokeStudio/glyph-miO">glyph-miO</a> ·
   <a href="https://github.com/FlokeStudio/glyph-s">glyph-s</a>
 </p>
@@ -24,23 +25,28 @@
 
 **glyph-mi** is the **metadata intelligence core** of the Glyph family. It analyzes content — music tracks, notes, documents — and returns structured metadata: suggested tags, confidence scores, spectral features, and contextual hints.
 
-In 2.7, glyph-mi evolves from a Senza-specific pipeline into a **universal core** with pluggable product modules. Senza behavior is preserved; new products (like Cultiva) can plug in without forking the codebase.
+In 2.7, glyph-mi evolves from a Senza-specific pipeline into a **universal core** with pluggable product modules. Senza behavior is preserved; notes analysis is first-class; new products (like Cultiva) can plug in without forking the codebase.
 
 ### Who is this for?
 
 | Audience | What you need |
 |----------|---------------|
 | **Senza users** | glyph-mi runs inside Senza automatically — tags, metadata, spectral analysis |
-| **Obsidian users** | Install [**glyph-miO**](https://github.com/FlokeStudio/glyph-miO) instead — lighter, note-focused |
+| **Obsidian users** | Install [**glyph-miO**](https://github.com/FlokeStudio/glyph-miO) — note-focused; should converge on this repo’s `notes` module |
 | **Developers** | Use `analyzeUniversal()` to integrate MI into your own product |
 
-### What’s new in 2.7
+### What’s new in 2.7.1
 
-**Universal contracts** (`js/universal/contracts.js`):
+- **`notes` module** — title / headings / body → tag scores + extractive summary (for glyph-miO)
+- **`hints.fallbackReason`** when an unknown `moduleId` falls back to senza
+- **CHANGELOG** + API compatibility policy for `GLYPH_MI_API_VERSION`
+- Docs: spectral optional-extra degradation; mi ↔ miO vendoring roadmap
 
-- `normalizeInput(input)` — canonical input shape: `track`, `context`, `moduleId`
+### Universal contracts (`js/universal/contracts.js`)
+
+- `normalizeInput(input)` — canonical input shape: `track` / `note`, `context`, `moduleId`
 - `normalizeResult(base)` — canonical output: `fields`, `confidence`, `sources`, `hints`
-- `GLYPH_MI_API_VERSION = '2.7.0'` — versioned API surface
+- `GLYPH_MI_API_VERSION = '2.7.1'` — versioned API surface (see [CHANGELOG.md](CHANGELOG.md))
 
 **Module routing** (`js/universal/engine.js`):
 
@@ -51,6 +57,18 @@ const result = await analyzeUniversal(
   { track: { path: '/music/track.flac', title: 'Song' }, context: { app: 'senza' } },
   { moduleId: 'senza' }
 );
+
+const noteResult = await analyzeUniversal(
+  {
+    moduleId: 'notes',
+    note: {
+      title: 'Garden Log',
+      body: '# Beds\nTomato plants need morning sun…',
+      headings: ['Beds'],
+    },
+  },
+  { moduleId: 'notes' }
+);
 ```
 
 **Product modules:**
@@ -58,9 +76,12 @@ const result = await analyzeUniversal(
 | Module | Status | Product | Capabilities |
 |--------|--------|---------|--------------|
 | `senza` | **Active** | Senza music library | tags, metadata, spectral, kNN, local-agent |
+| `notes` (`text` alias) | **Active** | glyph-miO / notes | tags, headings, summary, metadata |
 | `cultiva` | Foundation | Cultiva (future) | scaffold — manifest + handler stub |
 
 **Senza adapter** — wraps the existing `analyzeTrackFull()` pipeline through universal contracts. Zero breaking changes for Senza integrations.
+
+**Notes module** — real pipeline (not a scaffold): tag-scoring heuristics + extractive summary stubs structured for glyph-miO to consume.
 
 **Cultiva foundation** — scaffold module with manifest, placeholder handler, and knowledge pack at `knowledge/public/cultiva-foundation-v1.json`. Ready for future product wiring.
 
@@ -70,39 +91,43 @@ const result = await analyzeUniversal(
 import { listGlyphModules, resolveGlyphModule } from './js/index.js';
 
 listGlyphModules();
-// [{ moduleId: 'senza', label: 'Senza Module', capabilities: [...] }, ...]
+// [{ moduleId: 'senza', ... }, { moduleId: 'notes', ... }, { moduleId: 'cultiva', ... }]
 
-resolveGlyphModule('senza');
+resolveGlyphModule('notes');
 // { moduleId, label, enabledByDefault, capabilities, product }
 ```
 
-### How analysis works (Senza module)
+### How analysis works
 
-1. **Input normalization** — track path, title, artist, album, genre, glyph features
-2. **Pipeline execution** — spectral analysis, kNN neighbor lookup, tag propagation
+1. **Input normalization** — track or note fields (`title`, `headings`, `body`, path, glyph features)
+2. **Module pipeline** — senza music pipeline, or notes tag/summary pipeline
 3. **Result normalization** — confidence score, field map, source attribution, hints
-4. **Fallback** — unknown `moduleId` routes to default analyzer with `hints.fallback` note
+4. **Fallback** — unknown `moduleId` routes to default analyzer with `hints.fallback: true` and machine-readable `hints.fallbackReason`
 
-### Python CLI
-
-For batch analysis and scripting:
+### Spectral optional extra (degradation)
 
 ```bash
 pip install -e ".[spectral]"
-glyph-mi analyze --help
 ```
 
-The Python package shares the same analysis logic and supports spectral feature extraction when the `[spectral]` extra is installed.
+When the optional `[spectral]` extra (librosa) is **not** installed, or analysis fails:
 
-### Pair with glyph-s
+- Rules / knowledge / filename heuristics still run
+- BPM / energy / genre-from-audio are **skipped**
+- Confidence **does not** receive spectral boosts (graceful degradation)
+- Python `analyze_one` may set `hints.spectralAvailable: false` and `hints.degradation: 'spectral-unavailable'`
+
+Precomputed `glyphFeatures` in context still apply when present (e.g. from Senza import).
+
+### Pair with glyph-s / glyph-miO
 
 | glyph-s | glyph-mi |
 |---------|----------|
 | Finds content across your library | Understands individual items |
-| Full-text search, ranking, snippets | Tags, metadata, spectral features |
-| [glyph-sO](https://github.com/FlokeStudio/glyph-sO) for Obsidian | [glyph-miO](https://github.com/FlokeStudio/glyph-miO) for Obsidian |
+| Full-text search, ranking, snippets | Tags, metadata, spectral / note features |
+| [glyph-sO](https://github.com/FlokeStudio/glyph-sO) vendors glyph-s | [glyph-miO](https://github.com/FlokeStudio/glyph-miO) should converge on `notes` — **not yet vendored** |
 
-Together they form the complete Glyph intelligence stack.
+**Roadmap:** glyph-sO already vendors `glyph-s`. That pattern does **not** yet apply to glyph-mi vs glyph-miO (miO still has local `services/`). Plan: have miO call this `notes` module / vendor glyph-mi, then drop duplicated heuristics.
 
 ---
 
@@ -118,6 +143,10 @@ js/
   modules/
     senza/
       index.js            # analyzeForSenza, SENZA_MODULE_MANIFEST
+    notes/
+      index.js            # analyzeForNotes, NOTES_MODULE_MANIFEST
+      pipeline.js         # tag scoring + extractive summary
+      manifest.json
     cultiva/
       index.js            # analyzeForCultivaFoundation (scaffold)
       manifest.json
@@ -125,6 +154,8 @@ js/
     mi.js                 # default analyzeMI fallback
   pipeline.js             # Senza full analysis pipeline
   index.js                # public exports
+test/
+  contracts.test.js       # node:test — normalize + fallback + notes
 knowledge/
   public/
     cultiva-foundation-v1.json   # Cultiva knowledge pack placeholder
@@ -138,11 +169,14 @@ Modules are registered in `js/universal/engine.js`:
 const MODULE_HANDLERS = {
   senza: analyzeForSenza,
   cultiva: analyzeForCultivaFoundation,
+  notes: analyzeForNotes,
+  text: analyzeForNotes,
 };
 
 const MODULE_MANIFESTS = {
   senza: SENZA_MODULE_MANIFEST,
   cultiva: CULTIVA_MODULE_MANIFEST,
+  notes: NOTES_MODULE_MANIFEST,
 };
 ```
 
@@ -156,10 +190,14 @@ To add a new product module:
 
 ```js
 {
-  moduleId: 'senza',           // optional, default 'senza'
+  moduleId: 'senza' | 'notes' | 'text' | 'cultiva',
   track: {
     id, path, title, artist, album, genre, year, trackNo,
-    glyphFeatures,             // spectral / glyph data
+    body, headings,              // notes-oriented (optional)
+    glyphFeatures,               // spectral / glyph data
+  },
+  note: {                        // optional alias for notes module
+    title, body, headings, path, frontTags,
   },
   context: {
     folderHint, siblingTracks, tags, app,
@@ -171,13 +209,17 @@ To add a new product module:
 
 ```js
 {
-  apiVersion: '2.7.0',
-  moduleId: 'senza',
+  apiVersion: '2.7.1',
+  moduleId: 'senza' | 'notes' | 'cultiva',
   provider: 'glyph-mi',
   fields: { /* product-specific metadata */ },
-  confidence: { score: 0.85, reasons: ['spectral match', 'kNN neighbor'] },
+  confidence: { score: 0.85, reasons: ['…'] },
   sources: [/* attribution */],
-  hints: { /* optional guidance */ },
+  hints: {
+    /* optional guidance */
+    fallback?: true,
+    fallbackReason?: 'unknown moduleId "…", routed to default senza analyzer',
+  },
 }
 ```
 
@@ -187,8 +229,9 @@ To add a new product module:
 git clone https://github.com/krwg/glyph-mi.git
 cd glyph-mi
 
-# JavaScript (no build step — ESM source)
+# JavaScript (ESM — no build step)
 node -e "import('./js/index.js').then(m => console.log(m.listGlyphModules()))"
+npm test
 
 # Python
 pip install -e ".[spectral]"
@@ -201,19 +244,22 @@ pip install -e ".[spectral]"
 | `js/universal/contracts.js` | API version, input/output normalization |
 | `js/universal/engine.js` | Universal entry, module routing, fallback |
 | `js/modules/senza/` | Senza adapter (active) |
+| `js/modules/notes/` | Notes adapter (active) |
 | `js/modules/cultiva/` | Cultiva foundation (scaffold) |
 | `js/pipeline.js` | Senza analysis pipeline |
+| `test/` | Minimal node:test suite |
+| `CHANGELOG.md` | Releases + API compatibility policy |
 | `knowledge/public/` | Knowledge packs for modules |
-| `pyproject.toml` | Python package metadata (v2.7.0) |
+| `pyproject.toml` | Python package metadata (v2.7.1) |
 | `docs/index.html` | GitHub Pages landing |
 
 ### Related repositories
 
 | Repo | Role |
 |------|------|
-| [glyph-miO](https://github.com/FlokeStudio/glyph-miO) | Obsidian plugin (extractive summaries + tags) |
+| [glyph-miO](https://github.com/FlokeStudio/glyph-miO) | Obsidian plugin — converge on `notes` module |
 | [glyph-s](https://github.com/FlokeStudio/glyph-s) | Shared search engine |
-| [glyph-sO](https://github.com/FlokeStudio/glyph-sO) | Obsidian search plugin |
+| [glyph-sO](https://github.com/FlokeStudio/glyph-sO) | Obsidian search plugin (vendors glyph-s) |
 
 ### License
 

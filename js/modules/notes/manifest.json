@@ -1,0 +1,9 @@
+{
+  "moduleId": "notes",
+  "label": "Notes Module",
+  "enabledByDefault": true,
+  "status": "active",
+  "capabilities": ["tags", "headings", "summary", "metadata"],
+  "product": "glyph-miO",
+  "aliases": ["text"]
+}

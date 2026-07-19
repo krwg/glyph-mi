@@ -141,8 +141,9 @@
       <a class="btn btn-secondary" href="https://github.com/krwg/glyph-mi/blob/main/README.md">Read the docs</a>
     </div>
     <div class="pill-row">
-      <span class="pill">v2.7.0</span>
+      <span class="pill">v2.7.1</span>
       <span class="pill active">module: senza</span>
+      <span class="pill active">module: notes</span>
       <span class="pill scaffold">module: cultiva</span>
       <span class="pill">JS + Python</span>
     </div>
@@ -158,11 +159,15 @@
       </article>
       <article class="card">
         <h3>Module routing</h3>
-        <p><code>analyzeUniversal(input, { moduleId })</code> routes to the right handler. Unknown modules fall back to the default Senza analyzer with a hint in the response.</p>
+        <p><code>analyzeUniversal(input, { moduleId })</code> routes to the right handler. Unknown modules fall back to the default Senza analyzer with <code>hints.fallbackReason</code>.</p>
       </article>
       <article class="card">
         <h3>Senza module adapter</h3>
         <p>Full Senza pipeline — tags, metadata, spectral analysis, kNN, local agent — wrapped as <code>module-senza</code> with zero behavior change for existing callers.</p>
+      </article>
+      <article class="card">
+        <h3>Notes module</h3>
+        <p>Active title / headings / body pipeline with tag scoring and extractive summary stubs. Alias <code>text</code>. Target consumer: glyph-miO.</p>
       </article>
       <article class="card">
         <h3>Cultiva foundation</h3>
@@ -178,8 +183,9 @@
 <span class="hl">analyzeUniversal(input, { moduleId })</span><br>
 &nbsp;&nbsp;│<br>
 &nbsp;&nbsp;├─ <span class="gr">module: senza</span>  → analyzeForSenza()  → Senza pipeline (tags, spectral, kNN)<br>
+&nbsp;&nbsp;├─ <span class="gr">module: notes</span>  → analyzeForNotes()  → tags + extractive summary<br>
 &nbsp;&nbsp;├─ <span class="wn">module: cultiva</span> → analyzeForCultivaFoundation() → scaffold<br>
-&nbsp;&nbsp;└─ <span class="hl">fallback</span>       → analyzeMI() → normalizeResult()<br>
+&nbsp;&nbsp;└─ <span class="hl">fallback</span>       → analyzeMI() + hints.fallbackReason<br>
 <br>
 <span class="hl">contracts.js</span>  normalizeInput / normalizeResult / GLYPH_MI_API_VERSION<br>
 <span class="hl">engine.js</span>     listGlyphModules / resolveGlyphModule / MODULE_HANDLERS
@@ -196,6 +202,11 @@
         <p>Music library metadata intelligence for Senza. Capabilities: tags, metadata, spectral analysis, kNN neighbors, local agent hints. Enabled by default.</p>
       </article>
       <article class="card">
+        <span class="status status-active">Active</span>
+        <h3>notes</h3>
+        <p>Textual notes for glyph-miO. Capabilities: tags, headings, extractive summary, metadata. Alias <code>text</code>.</p>
+      </article>
+      <article class="card">
         <span class="status status-scaffold">Foundation</span>
         <h3>cultiva</h3>
         <p>Placeholder for Cultiva product integration. Manifest and handler scaffold in place; knowledge pack at <code>knowledge/public/cultiva-foundation-v1.json</code>.</p>
@@ -210,7 +221,7 @@
 <span class="kw">import</span> { analyzeUniversal, listGlyphModules } <span class="kw">from</span> <span class="str">'./js/index.js'</span>;
 
 <span class="kw">const</span> modules = listGlyphModules();
-<span class="kw">//</span> [{ moduleId: 'senza', ... }, { moduleId: 'cultiva', ... }]
+<span class="kw">//</span> [{ moduleId: 'senza', ... }, { moduleId: 'notes', ... }, ...]
 
 <span class="kw">const</span> result = <span class="kw">await</span> analyzeUniversal({
   moduleId: <span class="str">'senza'</span>,
@@ -238,7 +249,7 @@ glyph-mi analyze --help
       </article>
       <article class="card">
         <h3>glyph-miO (Obsidian)</h3>
-        <p>Obsidian plugin with simplified extractive summaries and tag scoring. Shares design principles, lighter runtime.</p>
+        <p>Obsidian plugin — should converge on the <code>notes</code> module. Unlike glyph-sO, it does not yet vendor glyph-mi.</p>
       </article>
       <article class="card">
         <h3>Custom integrations</h3>

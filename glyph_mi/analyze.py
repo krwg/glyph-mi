@@ -29,12 +29,19 @@ def analyze_one(inp: dict) -> dict:
     spectral = context.get("glyphFeatures") or (
         analyze_spectral(file_path) if file_path else None
     )
+    spectral_unavailable = False
     if spectral:
         if not merged.get("genre") and spectral.get("genreHint"):
             merged["genre"] = spectral["genreHint"]
             reasons.append("glyph-spectral: genre from spectrum")
         if "glyph-spectral" not in sources:
             sources.append("glyph-spectral")
+    elif file_path and not context.get("glyphFeatures"):
+        # Optional [spectral] extra missing, or librosa failed — degrade gracefully.
+        spectral_unavailable = True
+        reasons.append(
+            "glyph-spectral: unavailable (optional [spectral] extra missing or audio analysis failed)"
+        )
 
     if not merged.get("artists") and merged.get("artist"):
         merged["artists"] = split_artists(merged["artist"])
@@ -43,6 +50,15 @@ def analyze_one(inp: dict) -> dict:
     if any("knowledge" in r for r in reasons):
         if "glyph-knowledge" not in sources:
             sources.append("glyph-knowledge")
+
+    hints = [{"field": "*", "message": r} for r in reasons[:12]]
+    out_hints: dict | list = hints
+    if spectral_unavailable:
+        out_hints = {
+            "messages": hints,
+            "spectralAvailable": False,
+            "degradation": "spectral-unavailable",
+        }
 
     return {
         "fields": {
@@ -57,7 +73,7 @@ def analyze_one(inp: dict) -> dict:
         "confidence": confidence,
         "sources": sources,
         "provider": "glyph-mi",
-        "hints": [{"field": "*", "message": r} for r in reasons[:12]],
+        "hints": out_hints,
     }
 
 
