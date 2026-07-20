@@ -1,4 +1,4 @@
-﻿export const DEFAULT_OLLAMA_URL = 'http://127.0.0.1:11434';
+export const DEFAULT_OLLAMA_URL = 'http://127.0.0.1:11434';
 export const DEFAULT_OLLAMA_MODEL = 'llama3.2';
 
 export function parseJsonLoose(text) {

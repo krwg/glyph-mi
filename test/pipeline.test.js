@@ -17,6 +17,7 @@ import { titleEmbedding } from '../js/core/title-vector.js';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 function baseResult(overrides = {}) {
+  const { fields: fieldOverrides, confidence: confOverrides, ...rest } = overrides;
   return {
     fields: {
       title: 'Empty Genre Track',
@@ -25,13 +26,13 @@ function baseResult(overrides = {}) {
       genre: '',
       year: '2024',
       trackNo: '1',
-      ...(overrides.fields || {}),
+      ...fieldOverrides,
     },
-    confidence: { score: 40, reasons: ['rules'], ...(overrides.confidence || {}) },
+    confidence: { score: 40, reasons: ['rules'], ...confOverrides },
     sources: ['glyph-rules'],
     provider: 'glyph-mi',
     hints: [],
-    ...overrides,
+    ...rest,
   };
 }
 
