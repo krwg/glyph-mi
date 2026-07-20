@@ -3,7 +3,7 @@ import {
   DEFAULT_OLLAMA_URL,
   ollamaAvailable,
   ollamaJson,
-} from '../../core/ollama.js';
+} from '../core/ollama.js';
 
 function buildPrompt(input) {
   const tags = input.tags || {};
