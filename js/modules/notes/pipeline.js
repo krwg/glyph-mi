@@ -1,8 +1,3 @@
-/**
- * Textual notes analysis — tag scoring + extractive summary stubs.
- * Heuristics aligned with glyph-miO services for future convergence.
- */
-
 const STOP_WORDS = new Set([
   'the', 'that', 'this', 'with', 'from', 'have', 'will', 'your', 'note', 'tags', 'and', 'for',
   'для', 'как', 'это', 'при', 'что', 'или', 'эта', 'этот', 'того', 'быть', 'были', 'может',
@@ -77,10 +72,6 @@ export function extractiveSummary(body, headings = []) {
   return picked.map((x) => x.sentence).join(' ');
 }
 
-/**
- * Score tag candidates from title, headings, and body.
- * @returns {{ tags: string[], tagScores: Array<{tag:string,score:number}>, wordCount: number, linkCount: number }}
- */
 export function scoreTags({ title = '', headings = [], body = '', frontTags = [] } = {}) {
   const words = String(body || '').toLowerCase().match(/[a-z0-9а-яё]{4,}/g) || [];
   const freq = new Map();
@@ -125,9 +116,6 @@ export function scoreTags({ title = '', headings = [], body = '', frontTags = []
   };
 }
 
-/**
- * Run the notes analysis pipeline from normalized input fields.
- */
 export function analyzeNotesPipeline({ title, headings, body, path, frontTags } = {}) {
   const resolvedHeadings =
     Array.isArray(headings) && headings.length

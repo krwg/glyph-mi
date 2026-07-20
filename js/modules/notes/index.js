@@ -15,10 +15,6 @@ export function getNotesModuleManifest() {
   return NOTES_MODULE_MANIFEST;
 }
 
-/**
- * Analyze a textual note (title / headings / body) through universal contracts.
- * Accepts track.* or note.* fields; glyph-miO can converge on this handler later.
- */
 export async function analyzeForNotes(input, _state = {}, options = {}) {
   const normalized = normalizeInput({ ...input, moduleId: 'notes' });
   const note = input.note || options.note || {};
@@ -69,5 +65,4 @@ export async function analyzeForNotes(input, _state = {}, options = {}) {
   });
 }
 
-/** Alias for callers that prefer moduleId: 'text'. */
 export const analyzeForText = analyzeForNotes;
