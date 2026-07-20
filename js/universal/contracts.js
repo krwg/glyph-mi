@@ -1,4 +1,4 @@
-export const GLYPH_MI_API_VERSION = '2.7.1';
+export const GLYPH_MI_API_VERSION = '2.8.0';
 
 function asStringArray(value) {
   if (!Array.isArray(value)) return [];

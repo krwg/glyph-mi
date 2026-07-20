@@ -11,6 +11,7 @@ export { applyKnowledge } from './knowledge.js';
 export { analyzeUniversal, listGlyphModules, resolveGlyphModule };
 export { analyzeForNotes, NOTES_MODULE_MANIFEST };
 export { GLYPH_MI_API_VERSION, normalizeInput, normalizeResult };
+export { createKnnIpcHandler } from './core/knn-ipc.js';
 
 
 export async function analyze(input, options = {}) {

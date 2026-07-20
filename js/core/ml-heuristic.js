@@ -21,8 +21,6 @@ const GENRES = [
   'Other',
 ];
 
-const MOODS = ['drive', 'upbeat', 'focus', 'chill'];
-
 function norm(s) {
   return String(s || '').toLowerCase();
 }

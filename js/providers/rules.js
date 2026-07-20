@@ -1,5 +1,5 @@
-import { parseArtistTitle, splitArtists, joinArtists } from '../utils/artists.js';
-import { basename, cleanBase } from '../core/normalize.js';
+import { splitArtists, joinArtists } from '../utils/artists.js';
+import { cleanBase } from '../core/normalize.js';
 import { parseFilenameMetadata } from '../core/filename-parser.js';
 import { buildConfidence } from '../core/confidence.js';
 import { consensusFromSiblings, hintFromPath } from '../core/context.js';

@@ -46,7 +46,7 @@ export function findDuplicateGroupsFromItems(items) {
     const key = list
       .map((x) => x.id || x.filePath || x.tags?.path)
       .sort()
-      .join('\0;
+      .join('\0');
     if (seen.has(key)) return;
     seen.add(key);
     groups.push({ reason, items: list });

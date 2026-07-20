@@ -8,21 +8,24 @@ Universal metadata intelligence core — rules → knowledge → ML → KNN → 
 - SQLite logging with 60-day decay
 - `notes` module for Obsidian/Cultiva convergence
 
+## Shipped (2.8.0)
+
+| Item | Notes |
+|------|-------|
+| **npm package** `@floke/glyph-mi` | Public package metadata, `files` field, lint/test scripts — publish-ready (not yet on registry) |
+| **Pipeline diagram** | ASCII flow in [README.md](README.md) |
+| **KNN IPC module** | `js/core/knn-ipc.js` — in-process `createKnnIpcHandler(dbPath)` with `query` / `loadFeatures`; Electron apps wrap via `glyph-db.cjs` |
+
 ## Priority backlog
-
-### Week 3
-
-- **npm package** `@floke/glyph-mi` — `npm install` for Cultiva and third-party apps (today: vendored / mirror only)
 
 ### Month 2
 
 | Item | Description |
 |------|-------------|
 | **ONNX model** | `train-glyph-genre.py` + 500+ rows in `glyph-log.sqlite` → ship `.onnx`; promote `ml-heuristic.js` to real ML |
-| **KNN in main process** | Move `tracks_features` out of renderer; IPC via `glyph-db.cjs` for 10k+ libraries |
-| **Pipeline diagram** | ASCII flow in README (GUIDE.ru.md exists; add visual in EN README) |
+| **KNN in main process** | Wire `createKnnIpcHandler` through Electron IPC; move `tracks_features` out of renderer for 10k+ libraries |
 
-## Pipeline (target diagram for README)
+## Pipeline (README diagram)
 
 ```
 Input (track / note / habit)

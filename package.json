@@ -1,10 +1,19 @@
 {
-  "name": "glyph-mi",
-  "version": "2.7.1",
-  "private": true,
+  "name": "@floke/glyph-mi",
+  "version": "2.8.0",
   "type": "module",
   "description": "Glyph Metadata Intelligence — universal analysis core",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "js",
+    "models",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
+    "lint": "eslint js test",
     "test": "node --test test/**/*.test.js"
   },
   "exports": {
@@ -12,5 +21,9 @@
   },
   "engines": {
     "node": ">=18"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.28.0",
+    "eslint": "^9.28.0"
   }
 }

@@ -2,7 +2,7 @@
   <img src="docs/assets/glyph-transparent.png" width="88" alt="Glyph" />
 </p>
 
-<h1 align="center">glyph-mi 2.7</h1>
+<h1 align="center">glyph-mi 2.8</h1>
 
 <p align="center">
   <strong>Glyph Metadata Intelligence</strong><br>
@@ -25,7 +25,7 @@
 
 **glyph-mi** is the **metadata intelligence core** of the Glyph family. It analyzes content — music tracks, notes, documents — and returns structured metadata: suggested tags, confidence scores, spectral features, and contextual hints.
 
-In 2.7, glyph-mi evolves from a Senza-specific pipeline into a **universal core** with pluggable product modules. Senza behavior is preserved; notes analysis is first-class; new products (like Cultiva) can plug in without forking the codebase.
+In 2.8, glyph-mi ships as an **npm package** (`@floke/glyph-mi`) with an in-process KNN IPC handler for library-neighbor queries. In 2.7, glyph-mi evolved from a Senza-specific pipeline into a **universal core** with pluggable product modules. Senza behavior is preserved; notes analysis is first-class; new products (like Cultiva) can plug in without forking the codebase.
 
 ### Who is this for?
 
@@ -34,6 +34,12 @@ In 2.7, glyph-mi evolves from a Senza-specific pipeline into a **universal core*
 | **Senza users** | glyph-mi runs inside Senza automatically — tags, metadata, spectral analysis |
 | **Obsidian users** | Install [**glyph-miO**](https://github.com/FlokeStudio/glyph-miO) — note-focused; should converge on this repo’s `notes` module |
 | **Developers** | Use `analyzeUniversal()` to integrate MI into your own product |
+
+### What’s new in 2.8.0
+
+- **`@floke/glyph-mi` npm package** — publish-ready metadata, lint/test scripts, public `files` manifest
+- **`createKnnIpcHandler(dbPath)`** — in-process KNN with `query(vector, k)` and `loadFeatures(rows)`; Electron apps (Senza, Cultiva) wrap this via `glyph-db.cjs` IPC
+- **Expanded tests** — `knn-ipc.test.js`, `batch.test.js`
 
 ### What’s new in 2.7.1
 
@@ -46,7 +52,7 @@ In 2.7, glyph-mi evolves from a Senza-specific pipeline into a **universal core*
 
 - `normalizeInput(input)` — canonical input shape: `track` / `note`, `context`, `moduleId`
 - `normalizeResult(base)` — canonical output: `fields`, `confidence`, `sources`, `hints`
-- `GLYPH_MI_API_VERSION = '2.7.1'` — versioned API surface (see [CHANGELOG.md](CHANGELOG.md))
+- `GLYPH_MI_API_VERSION = '2.8.0'` — versioned API surface (see [CHANGELOG.md](CHANGELOG.md))
 
 **Module routing** (`js/universal/engine.js`):
 
@@ -99,6 +105,28 @@ resolveGlyphModule('notes');
 
 ### How analysis works
 
+```
+Input (track / note / habit)
+        │
+        ▼
+   Rule engine ──► fast tags, stop-words
+        │
+        ▼
+ Knowledge base ──► genre/mood lexicon
+        │
+        ▼
+ ML heuristic ──► ONNX (planned) / heuristics today
+        │
+        ▼
+ KNN neighbors ──► similar items (IPC in main process)
+        │
+        ▼
+ Ollama (optional) ──► enrich when local LLM available
+        │
+        ▼
+ confidence + sources + hints.fallbackReason
+```
+
 1. **Input normalization** — track or note fields (`title`, `headings`, `body`, path, glyph features)
 2. **Module pipeline** — senza music pipeline, or notes tag/summary pipeline
 3. **Result normalization** — confidence score, field map, source attribution, hints
@@ -127,7 +155,25 @@ Precomputed `glyphFeatures` in context still apply when present (e.g. from Senza
 | Full-text search, ranking, snippets | Tags, metadata, spectral / note features |
 | [glyph-sO](https://github.com/FlokeStudio/glyph-sO) vendors glyph-s | [glyph-miO](https://github.com/FlokeStudio/glyph-miO) should converge on `notes` — **not yet vendored** |
 
-**Roadmap:** glyph-sO already vendors `glyph-s`. That pattern does **not** yet apply to glyph-mi vs glyph-miO (miO still has local `services/`). Plan: have miO call this `notes` module / vendor glyph-mi, then drop duplicated heuristics.
+**Roadmap:** glyph-sO already vendors `glyph-s`. That pattern does **not** yet apply to glyph-mi vs glyph-miO (miO still has local `services/`). Plan: have miO call this `notes` module / vendor `@floke/glyph-mi`, then drop duplicated heuristics.
+
+### Install (npm)
+
+```bash
+npm install @floke/glyph-mi
+```
+
+```js
+import { analyzeUniversal, createKnnIpcHandler } from '@floke/glyph-mi';
+
+const knn = createKnnIpcHandler('/path/to/glyph-log.sqlite');
+knn.loadFeatures(libraryRows);
+const neighbors = knn.query(titleVector, 8);
+```
+
+In Electron, the main process exposes the same handler over IPC (`glyph-db.cjs`); the npm module is the in-process implementation used by that bridge.
+
+Obsidian users: install [**glyph-miO**](https://github.com/FlokeStudio/glyph-miO) for note-focused analysis that should converge on this repo’s `notes` module.
 
 ---
 
@@ -156,6 +202,8 @@ js/
   index.js                # public exports
 test/
   contracts.test.js       # node:test — normalize + fallback + notes
+  knn-ipc.test.js         # KNN IPC handler neighbors
+  batch.test.js           # analyzeBatch array results
 knowledge/
   public/
     cultiva-foundation-v1.json   # Cultiva knowledge pack placeholder
@@ -209,7 +257,7 @@ To add a new product module:
 
 ```js
 {
-  apiVersion: '2.7.1',
+  apiVersion: '2.8.0',
   moduleId: 'senza' | 'notes' | 'cultiva',
   provider: 'glyph-mi',
   fields: { /* product-specific metadata */ },
@@ -250,7 +298,7 @@ pip install -e ".[spectral]"
 | `test/` | Minimal node:test suite |
 | `CHANGELOG.md` | Releases + API compatibility policy |
 | `knowledge/public/` | Knowledge packs for modules |
-| `pyproject.toml` | Python package metadata (v2.7.1) |
+| `pyproject.toml` | Python package metadata (v2.8.0) |
 | `docs/index.html` | GitHub Pages landing |
 
 ### Related repositories
