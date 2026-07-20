@@ -52,4 +52,4 @@ Input (track / note / habit)
 ## Links
 
 - [glyph-miO](https://github.com/FlokeStudio/glyph-miO) — Obsidian plugin
-- [Cultiva](https://github.com/krwg/cultiva) — desktop consumer (glyph-s 2.7.2 search)
+- [Cultiva](https://github.com/krwg/cultiva) — desktop consumer (glyph-s 2.8.0 search)
