@@ -39,7 +39,7 @@ The public JS contract surface is versioned by `GLYPH_MI_API_VERSION` in
 ### Documented
 
 - Spectral `[spectral]` optional extra: without it, BPM/genre-from-audio signals are skipped and confidence lacks spectral reasons (graceful degradation).
-- Roadmap: glyph-miO should converge on the `notes` module; unlike glyph-sO ↔ glyph-s, mi ↔ miO does **not** yet vendor the core — planned.
+- glyph-miO ships the vendored `notes` module in 2.8.0 (`vendor/glyph-mi-notes.cjs`).
 
 ### Changed
 

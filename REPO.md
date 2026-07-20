@@ -23,8 +23,7 @@ Unknown `moduleId` → default senza analyzer with `hints.fallback` + `hints.fal
 
 Python: `pip install -e ".[spectral]"` enables local librosa BPM/energy/genre hints. Without it, analysis still runs; spectral signals are omitted and confidence does not get spectral boosts (`hints.degradation` / reason string when a file path was analyzed).
 
-## glyph-miO / vendoring roadmap
+## glyph-miO / notes vendor
 
-- **glyph-miO** currently ships its own `services/metadata.js` + `services/summary.js`. It should **converge** on this repo’s `notes` module (`analyzeUniversal({ moduleId: 'notes', note|track })`) so heuristics stay in one place.
-- **glyph-sO** already vendors [`glyph-s`](https://github.com/FlokeStudio/glyph-s) under `vendor/`. That pattern does **not** yet apply to **glyph-mi vs glyph-miO** — miO is still a parallel implementation.
-- **Roadmap:** vendor or otherwise consume `glyph-mi` from glyph-miO (similar to sO ↔ s), then delete duplicated note services.
+- **Shipped 2.8.0:** glyph-miO consumes `vendor/glyph-mi-notes.cjs` via `services/glyph-mi-notes-adapter.js`.
+- Local `services/*` remain as offline fallback when the vendor bundle is unavailable.

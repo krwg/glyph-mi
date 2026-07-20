@@ -46,7 +46,7 @@ In 2.8, glyph-mi ships as an **npm package** (`@floke/glyph-mi`) with an in-proc
 - **`notes` module** — title / headings / body → tag scores + extractive summary (for glyph-miO)
 - **`hints.fallbackReason`** when an unknown `moduleId` falls back to senza
 - **CHANGELOG** + API compatibility policy for `GLYPH_MI_API_VERSION`
-- Docs: spectral optional-extra degradation; mi ↔ miO vendoring roadmap
+- Docs: spectral optional-extra degradation; glyph-miO notes vendor in 2.8
 
 ### Universal contracts (`js/universal/contracts.js`)
 
@@ -155,7 +155,7 @@ Precomputed `glyphFeatures` in context still apply when present (e.g. from Senza
 | Full-text search, ranking, snippets | Tags, metadata, spectral / note features |
 | [glyph-sO](https://github.com/FlokeStudio/glyph-sO) vendors glyph-s | [glyph-miO](https://github.com/FlokeStudio/glyph-miO) should converge on `notes` — **not yet vendored** |
 
-**Roadmap:** glyph-sO already vendors `glyph-s`. That pattern does **not** yet apply to glyph-mi vs glyph-miO (miO still has local `services/`). Plan: have miO call this `notes` module / vendor `@floke/glyph-mi`, then drop duplicated heuristics.
+**glyph-miO** vendors the shared **`notes`** pipeline (`vendor/glyph-mi-notes.cjs`) for a common `confidence` / `sources` contract while keeping the local offline fallback.
 
 ### Install (npm)
 

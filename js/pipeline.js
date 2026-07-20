@@ -1,7 +1,7 @@
 import { analyze } from './index.js';
 import { sanitizeGlyphFields } from './core/sanitize.js';
 import { evaluateSuggestion } from './core/suggestion-confidence.js';
-import { classifyWithHeuristics } from './core/ml-heuristic.js';
+import { classifyGenreMood } from './core/glyph-onnx.js';
 import { knnSuggest } from './core/knn.js';
 import { titleEmbedding } from './core/title-vector.js';
 import { splitArtists } from './utils/artists.js';
@@ -42,14 +42,19 @@ function applySpectralLayer(fields, track, reasons, sources) {
   );
 }
 
-function applyMlLayer(fields, track, reasons, sources) {
-  const ml = classifyWithHeuristics({
-    title: fields.title,
-    artist: fields.artist,
-    path: track.path,
-    glyph: track.glyph || {},
-    genre: fields.genre,
-  });
+async function applyMlLayer(fields, track, reasons, sources, settings = {}) {
+  const ml = await classifyGenreMood(
+    {
+      title: fields.title,
+      artist: fields.artist,
+      path: track.path,
+      glyph: track.glyph || {},
+      genre: fields.genre,
+      bpm: track.glyph?.bpm,
+      energy: track.glyph?.energy,
+    },
+    { modelPath: settings.onnxModelPath }
+  );
   const patch = {};
   if (!fields.genre && ml.genre && (ml.fromText || ml.confidence >= 0.6)) {
     patch.genre = ml.genre;
@@ -93,7 +98,7 @@ export async function runGlyphPipeline(track, state, baseResult, { libraryRows =
   fields = spectralMerged.fields;
   reasons = spectralMerged.reasons;
 
-  const mlMerged = applyMlLayer(fields, track, reasons, sources);
+  const mlMerged = await applyMlLayer(fields, track, reasons, sources, settings);
   fields = mlMerged.fields;
   reasons = mlMerged.reasons;
 

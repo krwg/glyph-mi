@@ -6,6 +6,15 @@
   "publishConfig": {
     "access": "public"
   },
+  "author": "krwg",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/krwg/glyph-mi.git"
+  },
+  "homepage": "https://krwg.github.io/glyph-mi/",
+  "bugs": "https://github.com/krwg/glyph-mi/issues",
+  "keywords": ["glyph", "metadata", "offline-first", "knn"],
   "files": [
     "js",
     "models",
@@ -14,7 +23,8 @@
   ],
   "scripts": {
     "lint": "eslint js test",
-    "test": "node --test test/**/*.test.js"
+    "test": "node --test test/**/*.test.js",
+    "prepublishOnly": "npm run lint && npm test"
   },
   "exports": {
     ".": "./js/index.js"
